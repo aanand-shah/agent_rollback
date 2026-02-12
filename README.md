@@ -2,7 +2,6 @@
 
 **Git for AI Agents** - A middleware layer that captures state snapshots before/after each agent action, enabling point-in-time recovery.
 
-![Dashboard Screenshot](docs/dashboard.png)
 
 ## Overview
 
