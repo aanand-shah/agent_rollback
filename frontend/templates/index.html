@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgentRollback Dashboard</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <div class="sidebar-brand-icon">
+                    <i class="fas fa-code-branch"></i>
+                </div>
+                <h1>AgentRollback</h1>
+            </div>
+
+            <ul class="sidebar-nav">
+                <li class="sidebar-nav-item">
+                    <a href="#dashboard" class="sidebar-nav-link active" data-page="dashboard">
+                        <i class="fas fa-home"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a href="#sessions" class="sidebar-nav-link" data-page="sessions">
+                        <i class="fas fa-list"></i>
+                        <span>All Sessions</span>
+                    </a>
+                </li>
+            </ul>
+
+            <div class="sidebar-section">
+                <div class="sidebar-section-title">Quick Actions</div>
+                <ul class="sidebar-nav">
+                    <li class="sidebar-nav-item">
+                        <a href="/docs" target="_blank" class="sidebar-nav-link">
+                            <i class="fas fa-book"></i>
+                            <span>API Docs</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <a href="http://localhost:8001" target="_blank" class="sidebar-nav-link">
+                            <i class="fas fa-robot"></i>
+                            <span>Demo App</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-section-title">System Info</div>
+                <div style="color: var(--gray-400); font-size: 0.8125rem;">
+                    <p>Version 0.1.0</p>
+                    <p style="margin-top: 0.5rem;" id="connection-status">
+                        <span class="badge badge-success">Connected</span>
+                    </p>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Alert Container -->
+            <div id="alert-container"></div>
+
+            <!-- Dashboard Page -->
+            <div id="page-dashboard" class="page active">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">Dashboard</h1>
+                        <p class="page-subtitle">Monitor your AI agent state tracking</p>
+                    </div>
+                    <div class="action-buttons">
+                        <a href="http://localhost:8001" target="_blank" class="btn btn-primary">
+                            <i class="fas fa-external-link-alt"></i> Open Demo App
+                        </a>
+                        <button class="btn btn-secondary" id="refresh-btn">
+                            <i class="fas fa-sync"></i> Refresh
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Stats Grid -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-card-icon success">
+                            <i class="fas fa-play-circle"></i>
+                        </div>
+                        <div class="stat-card-value" id="stat-active">-</div>
+                        <div class="stat-card-label">Active Sessions</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-card-icon primary">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="stat-card-value" id="stat-completed">-</div>
+                        <div class="stat-card-label">Completed</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-card-icon danger">
+                            <i class="fas fa-times-circle"></i>
+                        </div>
+                        <div class="stat-card-value" id="stat-failed">-</div>
+                        <div class="stat-card-label">Failed</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-card-icon warning">
+                            <i class="fas fa-undo"></i>
+                        </div>
+                        <div class="stat-card-value" id="stat-rollbacks">-</div>
+                        <div class="stat-card-label">Rolled Back</div>
+                    </div>
+                </div>
+
+                <!-- Integration Guide -->
+                <div class="card" style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: white; margin-bottom: 1.5rem;">
+                    <h3 style="margin-bottom: 0.5rem;"><i class="fas fa-lightbulb"></i> Getting Started</h3>
+                    <p style="opacity: 0.9; margin-bottom: 1rem;">
+                        AgentRollback tracks your AI agent's actions and enables point-in-time recovery.
+                        Open the Demo App to see it in action, or integrate with your own application.
+                    </p>
+                    <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+                        <a href="http://localhost:8001" target="_blank" class="btn" style="background: rgba(255,255,255,0.2); color: white;">
+                            <i class="fas fa-play"></i> Try Demo App
+                        </a>
+                        <a href="/docs" target="_blank" class="btn" style="background: rgba(255,255,255,0.2); color: white;">
+                            <i class="fas fa-code"></i> View API Docs
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Recent Sessions -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Recent Sessions</h3>
+                        <span class="badge badge-info" id="session-count">0 sessions</span>
+                    </div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Session ID</th>
+                                    <th>Agent</th>
+                                    <th>Status</th>
+                                    <th>Started</th>
+                                    <th>Duration</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="sessions-tbody">
+                                <tr>
+                                    <td colspan="6" class="empty-state">
+                                        <div class="empty-state-icon">📭</div>
+                                        <p>No sessions yet. Start the Demo App to create some!</p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sessions List Page -->
+            <div id="page-sessions" class="page">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">All Sessions</h1>
+                        <p class="page-subtitle">View and manage all tracking sessions</p>
+                    </div>
+                    <button class="btn btn-secondary" id="refresh-sessions-btn">
+                        <i class="fas fa-sync"></i> Refresh
+                    </button>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Sessions</h3>
+                        <div class="action-buttons">
+                            <select class="form-input" style="width: auto;" id="status-filter">
+                                <option value="">All Statuses</option>
+                                <option value="active">Active</option>
+                                <option value="completed">Completed</option>
+                                <option value="failed">Failed</option>
+                                <option value="rolled_back">Rolled Back</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Session ID</th>
+                                    <th>Agent</th>
+                                    <th>Status</th>
+                                    <th>Started</th>
+                                    <th>Duration</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="all-sessions-tbody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Session Detail Modal -->
+    <div id="session-modal" class="modal-backdrop">
+        <div class="modal" style="max-width: 900px;">
+            <div class="modal-header">
+                <h3 class="modal-title">Session Details</h3>
+                <button class="modal-close" id="close-session-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <!-- Session Info -->
+                <div class="stats-grid" style="grid-template-columns: repeat(2, 1fr); margin-bottom: 1.5rem;">
+                    <div>
+                        <label class="form-label">Session ID</label>
+                        <code class="mono" id="modal-session-id">-</code>
+                    </div>
+                    <div>
+                        <label class="form-label">Agent ID</label>
+                        <span id="modal-agent-id">-</span>
+                    </div>
+                    <div>
+                        <label class="form-label">Status</label>
+                        <span id="modal-session-status">-</span>
+                    </div>
+                    <div>
+                        <label class="form-label">Started</label>
+                        <span id="modal-started-at">-</span>
+                    </div>
+                    <div>
+                        <label class="form-label">Ended</label>
+                        <span id="modal-ended-at">-</span>
+                    </div>
+                </div>
+
+                <!-- Tabs -->
+                <div class="tabs">
+                    <button class="tab active" data-tab="timeline">Timeline</button>
+                    <button class="tab" data-tab="snapshots">Recovery Points</button>
+                </div>
+
+                <!-- Timeline Tab -->
+                <div id="tab-timeline" class="tab-content">
+                    <div id="timeline-container">
+                        <div class="empty-state">Loading...</div>
+                    </div>
+                </div>
+
+                <!-- Snapshots Tab -->
+                <div id="tab-snapshots" class="tab-content" style="display: none;">
+                    <div id="snapshots-list">
+                        <div class="empty-state">Loading...</div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="close-modal-btn">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rollback Confirmation Modal -->
+    <div id="rollback-modal" class="modal-backdrop">
+        <div class="modal" style="max-width: 500px;">
+            <div class="modal-header">
+                <h3 class="modal-title">Confirm Rollback</h3>
+                <button class="modal-close" id="close-rollback-modal">&times;</button>
+            </div>
+            <div class="modal-body" id="rollback-modal-body">
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancel-rollback-btn">Cancel</button>
+                <button class="btn btn-danger" id="confirm-rollback-btn">Confirm Rollback</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Snapshot Detail Modal -->
+    <div id="snapshot-modal" class="modal-backdrop">
+        <div class="modal" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3 class="modal-title">Snapshot Details</h3>
+                <button class="modal-close" id="close-snapshot-modal">&times;</button>
+            </div>
+            <div class="modal-body" id="snapshot-modal-body">
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="close-snapshot-btn">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/dashboard.js"></script>
+</body>
+</html>
